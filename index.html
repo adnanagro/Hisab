@@ -60,6 +60,8 @@ input{width:100%;padding:11px;border:1px solid var(--bd);border-radius:8px;backg
 </form>
 <div id="list"></div>
 <div class="foot"><button onclick="copyAll()">সব হিসাব কপি করুন</button></div>
+<div class="foot"><button onclick="backup()">ব্যাকআপ কপি করুন</button><button onclick="showRestore()">ব্যাকআপ ফেরত আনুন</button></div>
+<div id="rb" style="display:none;margin-top:10px"><textarea id="rt" rows="5" placeholder="এখানে ব্যাকআপের লেখা পেস্ট করুন" style="width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font-size:14px"></textarea><button class="go" style="width:100%;margin-top:6px" onclick="doRestore()">ফেরত আনুন</button></div>
 <script>
 var cur='pay',S={pay:[],buy:[],deal:{}},ex={},names=[];
 try{var r=localStorage.getItem('showroom-hisab');if(r)S=JSON.parse(r)}catch(e){}
@@ -95,6 +97,9 @@ function deal(i){var v=prompt('"'+names[i]+'" এর সাথে চুক্�
 function copyAll(){
  var t='পেমেন্ট:\n'+S.pay.map(function(x){return x.date+' | '+x.name+' | '+x.note+' | '+x.amt}).join('\n')+'\nমোট: '+sum(S.pay)+'\n\nমাল কেনা:\n'+S.buy.map(function(x){return x.date+' | '+x.name+' | '+x.note+' '+x.qty+' | '+x.amt}).join('\n')+'\nমোট: '+sum(S.buy)+'\n\nসর্বমোট: '+(sum(S.pay)+sum(S.buy));
  try{navigator.clipboard.writeText(t).then(function(){alert('কপি হয়েছে')},function(){alert('কপি করা যায়নি')})}catch(e){alert('কপি করা যায়নি')}}
+function backup(){var t=JSON.stringify(S);try{navigator.clipboard.writeText(t).then(function(){alert('ব্যাকআপ কপি হয়েছে। এবার নতুন অ্যাপে গিয়ে "ব্যাকআপ ফেরত আনুন" চাপুন।')},function(){$('rb').style.display='block';$('rt').value=t;alert('নিচের লেখা সব সিলেক্ট করে কপি করুন')})}catch(e){$('rb').style.display='block';$('rt').value=t}}
+function showRestore(){$('rb').style.display='block';$('rt').value=''}
+function doRestore(){try{var d=JSON.parse($('rt').value.trim());if(!d||!Array.isArray(d.pay)||!Array.isArray(d.buy))throw 1;if(!confirm('এই অ্যাপের বর্তমান হিসাব মুছে ব্যাকআপের হিসাব বসাবেন?'))return;S={pay:d.pay,buy:d.buy,deal:d.deal||{}};save();$('rb').style.display='none';render();alert('হিসাব ফেরত এসেছে')}catch(e){alert('ব্যাকআপের লেখা ঠিক নেই। পুরোটা কপি করে বসান।')}}
 $('date').value=new Date().toISOString().slice(0,10);
 tab('pay');
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
